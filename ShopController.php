@@ -108,45 +108,6 @@ class ShopController extends Controller
         Session::forget('cart');
         return redirect()->route('show.index')->with('success','success');
     }
-
-    // Wishlist functions
-    public function addToWishList(Request $request,$id){
-        if(\Auth::check()) {
-            $product = Product::find($id);
-
-            $oldWish = Session::has('Wishsession') ? Session::get('Wishsession') : null;
-            $wishSession = new Wishsession($oldWish);
-
-            $wishSession->add($product, $product->id);
-            DB::table('products')->where('id',$id)->update(['nbwishlist' => $product->nbwishlist+1]);
-            $request->session()->put('Wishsession', $wishSession);
-            return redirect()->route('show.productsSingle',['id' => $id])->with('wishlistmsg', 'Selected items was successfully added to your wishlist');;
-        }
-        return redirect()->route('login');
-    }
-
-    public function getWishList() {
-        if (!Session::has('Wishsession')) {
-            return view('payment.wishlist',['Wishsession' => null]);
-        }
-        $oldWishlist = Session::get('Wishsession');
-        $wishlist = new Wishsession($oldWishlist);
-        return view('payment.wishlist',['wishlists' => $wishlist->items]);
-    }
-
-    public function getRemoveItemWishlist($id) {
-        $oldCart = Session::has('Wishsession') ? Session::get('Wishsession') : null;
-        $cart = new Wishsession($oldCart);
-        $cart->removeItem($id);
-
-        if (count($cart->items) > 0){
-            Session::put('Wishsession', $cart);
-        } else {
-            Session::forget('Wishsession');
-        }
-
-        return redirect()->route('product.wishlist');
-    }
      
        public function getCoupon(Request $request) {
 
