@@ -16,62 +16,7 @@ use Validator;
 
 class ShopController extends Controller
 {
-
-     public function getCoupon(Request $request) {
-
-        $coupon = Coupon::where('code', $request->coupon_code)->first();
-        if ($coupon!= null) {
-        $oldCart = Session::has('cart') ? Session::get('cart') : null;
-        $cart = new Cart($oldCart);
-        $cart->coupon($coupon,$oldCart);
-        $request->session()->put('cart', $cart);
-        return redirect()->route('product.shoppingCart' )->with('Success!','The coupon was used');
-        }
-        return redirect()->route('product.shoppingCart')->withErrors('wrong coupon !');
-    }
-    
-    public function getEarnings(Request $request){
-        $content= $request->all();
-        $orders = DB::table('orders')->where('vendor',auth()->user()->name)->whereYear('created_at','=',$content['year'])->get();
-        $orders->transform(function ($order, $key) {
-            $order->cart = unserialize($order->cart);
-            return $order;
-        });
-        $counts = 0;
-        $earnings = 0;
-        foreach ($orders as $order) {
-            foreach ($order->cart->items as $item){
-                $earnings = $earnings + $item['price'];
-                $counts = $counts +1 ;
-            }
-        }
-        return view('author.earnings',['earnings' => $earnings,'counts' => $counts]);
-    }
-
-    public function categoryFilter(Request $request) {
-        $content= $request->getContent();
-        $data = json_decode($content, true);
-        $category = $data["type"];
-        $products = DB::table('products')
-            ->where('category',$category)->paginate(6);
-
-        return view('filters.productsCategory',['products' => $products]);
-    }
-
-    public function showProductsByPrice (Request $request) {
-        $content= $request->all();
-        $products = DB::table('products')
-            ->join('users','products.uploaded_by','=','users.id')
-            ->select('products.*','users.avatar as avatar','users.name as username')
-            ->where('price','>=',$content['min'])
-            ->where('price','<=',$content['max'])
-            ->paginate(18)
-            ;
-        return view('filters.productsPrice',['products' => $products]);
-    }
-
     // Cart functions
-
     public function getAddToCart(Request $request, $id) {
         if (!auth()->check()) {
             return redirect()->route('register');
@@ -86,8 +31,6 @@ class ShopController extends Controller
         $request->session()->put('cart', $cart);
         return redirect()->route('show.checkout');
     }
-
-
 
     public function getAddByOne(Request $request, $id) {
         $product = Product::find($id);
@@ -204,6 +147,60 @@ class ShopController extends Controller
 
         return redirect()->route('product.wishlist');
     }
+     
+       public function getCoupon(Request $request) {
+
+        $coupon = Coupon::where('code', $request->coupon_code)->first();
+        if ($coupon!= null) {
+        $oldCart = Session::has('cart') ? Session::get('cart') : null;
+        $cart = new Cart($oldCart);
+        $cart->coupon($coupon,$oldCart);
+        $request->session()->put('cart', $cart);
+        return redirect()->route('product.shoppingCart' )->with('Success!','The coupon was used');
+        }
+        return redirect()->route('product.shoppingCart')->withErrors('wrong coupon !');
+    }
+    
+    public function getEarnings(Request $request){
+        $content= $request->all();
+        $orders = DB::table('orders')->where('vendor',auth()->user()->name)->whereYear('created_at','=',$content['year'])->get();
+        $orders->transform(function ($order, $key) {
+            $order->cart = unserialize($order->cart);
+            return $order;
+        });
+        $counts = 0;
+        $earnings = 0;
+        foreach ($orders as $order) {
+            foreach ($order->cart->items as $item){
+                $earnings = $earnings + $item['price'];
+                $counts = $counts +1 ;
+            }
+        }
+        return view('author.earnings',['earnings' => $earnings,'counts' => $counts]);
+    }
+
+    public function categoryFilter(Request $request) {
+        $content= $request->getContent();
+        $data = json_decode($content, true);
+        $category = $data["type"];
+        $products = DB::table('products')
+            ->where('category',$category)->paginate(6);
+
+        return view('filters.productsCategory',['products' => $products]);
+    }
+
+    public function showProductsByPrice (Request $request) {
+        $content= $request->all();
+        $products = DB::table('products')
+            ->join('users','products.uploaded_by','=','users.id')
+            ->select('products.*','users.avatar as avatar','users.name as username')
+            ->where('price','>=',$content['min'])
+            ->where('price','<=',$content['max'])
+            ->paginate(18)
+            ;
+        return view('filters.productsPrice',['products' => $products]);
+    }
+
 
 
 }
