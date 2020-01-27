@@ -17,6 +17,19 @@ use Validator;
 class ShopController extends Controller
 {
 
+     public function getCoupon(Request $request) {
+
+        $coupon = Coupon::where('code', $request->coupon_code)->first();
+        if ($coupon!= null) {
+        $oldCart = Session::has('cart') ? Session::get('cart') : null;
+        $cart = new Cart($oldCart);
+        $cart->coupon($coupon,$oldCart);
+        $request->session()->put('cart', $cart);
+        return redirect()->route('product.shoppingCart' )->with('Success!','The coupon was used');
+        }
+        return redirect()->route('product.shoppingCart')->withErrors('wrong coupon !');
+    }
+    
     public function getEarnings(Request $request){
         $content= $request->all();
         $orders = DB::table('orders')->where('vendor',auth()->user()->name)->whereYear('created_at','=',$content['year'])->get();
