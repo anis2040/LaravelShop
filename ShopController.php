@@ -3,31 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Cart;
-use App\Category;
-use App\CompatibleBrowser;
-use App\CompatibleWith;
 use App\Order;
 use App\Product;
-use App\Site_detail;
-use App\SoftwareVersion;
-use App\ThemeforestFile;
-use App\Wishlist;
 use App\Wishsession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
-use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Response;
 use View;
 use Validator;
 
 
-class ProductsController extends Controller
+class ShopController extends Controller
 {
 
     public function getEarnings(Request $request){
